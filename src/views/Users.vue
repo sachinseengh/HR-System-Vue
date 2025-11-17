@@ -1,16 +1,16 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-import AddUsers from './AddUsers.vue';
+import AddUsers from '../components/AddUsers.vue';
 import axiosInstance from '../api/AxiosInstance';
-import { toast } from 'vue3-toastify';
 import useUserStore from '../userStore/UserStore';
 import router from '../router';
+import { toast } from 'vue-sonner';
 
 
 
 const userStore = useUserStore();
 
-const userToEdit=ref(null);
+const userToEdit = ref(null);
 
 // Your table data
 const users = ref([{}]);
@@ -19,7 +19,7 @@ const permissions = ref([{}]);
 
 
 
-async function getUserAndPermission(){
+async function getUserAndPermission() {
 
   const response = await axiosInstance.get("http://localhost:7071/user");
 
@@ -34,62 +34,75 @@ async function getUserAndPermission(){
 
 }
 
-onMounted( ()=>{getUserAndPermission()});
+onMounted(() => { getUserAndPermission() });
 
 const showUserAddingForm = ref(false);
 
 
-function handleUserAdded(){
+function handleUserAdded() {
 
   getUserAndPermission();
-  showUserAddingForm.value=false;
+  showUserAddingForm.value = false;
 }
 
-function handleUserUpdated(){
+function handleUserUpdated() {
   getUserAndPermission();
-  showUserAddingForm.value=false;
+  showUserAddingForm.value = false;
 }
 
 
-function handleClearProps(){
+function handleClearProps() {
   userToEdit.value = null
 }
 
 
-function editUser(user){
+function editUser(user) {
 
- 
+
   window.scrollTo({
-    top:0,
-    behavior:"smooth"
+    top: 0,
+    behavior: "smooth"
   })
 
   userToEdit.value = user;
-  showUserAddingForm.value=true;
+  showUserAddingForm.value = true;
 
 }
 
-async function deleteUser(user_id){
+async function deleteUser(userId, userName) {
 
-  try{
+  try {
 
-    const response = await axiosInstance.delete(`/user/${user_id}`)
+    toast.error(`Are you sure want to delete - ${userName}?`, {
+      action: {
+        label: "Yes",
+        onClick: async () => {
 
-    if(response.status === 200){
-      toast.success("User Deleted Successfully!");
-      getUserAndPermission();
-    }
+          const response = await axiosInstance.delete(`/user/${userId}`)
 
-  }catch(err){
+          if (response.status === 200) {
+            toast.success("User Deleted Successfully!");
+            getUserAndPermission();
+          }
+        }
+      },
+      duration: 3000,
+      position: "top-center",
+       
+    })
+
+
+
+  } catch (err) {
     toast.error("Server Error")
   }
 }
 
-function viewAttendenceReport(userId){
+function viewAttendenceReport(userId) {
 
   router.push({
-    name:'attendence-report',
-    query:{userId}
+    name: 'attendence-report',
+    query: { userId }
   })
 }
 
@@ -107,18 +120,15 @@ function viewAttendenceReport(userId){
         </div>
       </div>
 
-      <div class="add-user-form"   >
-        <div class="user-form" v-if="showUserAddingForm" >
-          <AddUsers 
-          :user="userToEdit"
-          @user-added="handleUserAdded"
-          @user-updated="handleUserUpdated"
-          @user-props-cleared="handleClearProps"/>
+      <div class="add-user-form">
+        <div class="user-form" v-if="showUserAddingForm">
+          <AddUsers :user="userToEdit" @user-added="handleUserAdded" @user-updated="handleUserUpdated"
+            @user-props-cleared="handleClearProps" />
 
         </div>
       </div>
 
-      <div class="users-table" v-if="userStore.isAdmin()"  >
+      <div class="users-table" v-if="userStore.isAdmin()">
         <table class="table table-striped table-hover custom-table">
           <thead>
             <tr>
@@ -145,26 +155,27 @@ function viewAttendenceReport(userId){
 
 
                   <input type="checkbox" :checked="user.permission?.some(p => p.id === permission.id)" disabled />
-                  <p >{{ permission.name?.charAt(0) }}</p>
+                  <p>{{ permission.name?.charAt(0) }}</p>
                 </div>
 
 
               </td>
-              <td class="actions" >
+              <td class="actions">
 
                 <i class="fa-solid fa-calendar-days" @click="viewAttendenceReport(user.id)"></i>
                 <i class="fa-solid fa-pen-to-square" @click="editUser(user)"></i>
-           
 
-                <i class="fa-solid fa-trash-can" @click="deleteUser(user.id)" v-if="user.id!=userStore.userInfo.id"></i>
-  
-                
+
+                <i class="fa-solid fa-trash-can" @click="deleteUser(user.id, user.name)"
+                  v-if="user.id != userStore.userInfo.id"></i>
+
+
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-       <div class="users-table"  v-if="!userStore.isAdmin()">
+      <div class="users-table" v-if="!userStore.isAdmin()">
         <table class="table table-striped table-hover custom-table">
           <thead>
             <tr>
@@ -174,7 +185,7 @@ function viewAttendenceReport(userId){
               <th>department</th>
               <th>permission</th>
               <th>Attendence</th>
-              
+
             </tr>
           </thead>
           <tbody>
@@ -191,21 +202,22 @@ function viewAttendenceReport(userId){
                   style="display: flex; column-gap: 0.2rem; margin-right: 0.3rem;">
 
 
-                  <input type="checkbox" :checked="userStore.userInfo.permissions?.some(p => p.id === permission.id)" disabled />
-                  <p >{{ permission.name?.charAt(0) }}</p>
+                  <input type="checkbox" :checked="userStore.userInfo.permissions?.some(p => p.id === permission.id)"
+                    disabled />
+                  <p>{{ permission.name?.charAt(0) }}</p>
                 </div>
 
 
               </td>
-               <td class="actions" >
+              <td class="actions">
 
-              <router-link to="/attendence">    <i class="fa-solid fa-calendar-days" ></i></router-link>   
-              
+                <router-link to="/attendence"> <i class="fa-solid fa-calendar-days"></i></router-link>
+
               </td>
 
 
-                
-             
+
+
             </tr>
           </tbody>
         </table>
@@ -215,6 +227,11 @@ function viewAttendenceReport(userId){
 </template>
 
 <style scoped>
+
+
+ 
+
+
 .users {
   width: 100%;
 }
@@ -262,8 +279,4 @@ function viewAttendenceReport(userId){
 .users-table tbody tr:hover {
   background-color: #c1e0ff;
 }
-
-  
- 
-
 </style>

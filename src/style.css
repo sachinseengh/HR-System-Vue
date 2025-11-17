@@ -19,6 +19,7 @@
 html{
   background-color: var(--primary-background);
   font-size: var(--font-size);
+  font-family: 'Open Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
  
 }
 
@@ -28,4 +29,13 @@ a {
 
 a:active {
   color: black !important;
+}
+
+ /* in your App.vue or global CSS */
+.sn-action {
+  background-color: #18b51d !important; /* green */
+  color: white !important;              /* text color */
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: bold;
 }

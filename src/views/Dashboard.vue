@@ -57,15 +57,10 @@ const totalPermission = ref(0);
     }
 }
 
+onMounted(async () => {
 
- 
-
-
-
-onMounted(async()=>{
-
-    const response = await fetch("http://localhost:7071/dashboard");
-    const data = await response.json();
+    const response = await axiosInstance.get("/dashboard");
+    const data = await response.data;
 
     totalUser.value=data.userCount;
     totalDepartment.value=data.departmentCount;
@@ -83,13 +78,8 @@ const userStore= useUserStore();
 
 <template>
 
-    <section class="dashboard">
-
-        
- 
+    <section class="dashboard"> 
         <div class="none-admin-section" v-if="!userStore.isAdmin()" >
-
-           
             <p> Welcome to The MOCO HR System</p>
         </div>
 
@@ -121,15 +111,11 @@ const userStore= useUserStore();
     padding:2rem 4rem;
 }
 
-
 .items-grid{
     display: grid;
     grid-template-columns: repeat(auto-fit ,minmax(10rem,11rem));
     gap:2rem;
-    justify-content: flex-start;
-
-    
-    
+    justify-content: flex-start;    
 }
 
 .card{
@@ -150,15 +136,17 @@ const userStore= useUserStore();
 }
 
 .title{
-/* position: absolute;
-top: 1rem; */
-font-family: Arial, Helvetica, sans-serif;
-font-weight: 700;
-font-size: 1.7rem;
+    /* position: absolute;
+    top: 1rem; */
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 700;
+    font-size: 1.7rem;
 }
+
 .value{
     font-family: Arial, Helvetica, sans-serif;
     font-weight: 700;
-font-size: 2.5rem;
+    font-size: 2.5rem;
 }
+
 </style>

@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-import AddDepartment from './AddDepartment.vue';
+import AddDepartment from '../components/AddDepartment.vue';
 import axiosInstance from '../api/AxiosInstance';
 import { toast } from 'vue3-toastify';
 
@@ -84,7 +84,6 @@ onMounted( ()=>{loadDepartment()});
       <AddDepartment  @department-added="loadDepartment" @clear-department="clearProps" :department="departmentToEdit"/>
     </div>
     
-
     <div class="departments-section">
       <div class="departments-table">
         <table class="table table-striped table-hover custom-table">

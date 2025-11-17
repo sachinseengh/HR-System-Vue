@@ -1,22 +1,22 @@
 <script setup>
- 
-import { onMounted } from 'vue';
-import SideBar from './components/SideBar.vue';
-import Layout from './layout/Layout.vue';
-import Dashboard from './views/Dashboard.vue';
-import { toast } from 'vue3-toastify';
+
+import { Toaster, toast } from 'vue-sonner'
+import 'vue-sonner/style.css'
 
  
  
 </script>
 
 <template>
- 
+     
+<Toaster position="top-right" closeButton="true" closeButtonPosition="top-right" :expand="true" :duration="1000"/>
 <router-view></router-view>
  
 </template>
 
 
 <style scoped>
+
+ 
 
 </style>

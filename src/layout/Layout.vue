@@ -1,10 +1,9 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import BottomBar from '../components/BottomBar.vue';
-import Header from '../components/header.vue';
+import Header from '../components/Header.vue';
 import SideBar from '../components/SideBar.vue';
 import useUserStore from '../userStore/UserStore';
-import Dashboard from '../views/Dashboard.vue';
 
 const userStore = useUserStore();
 
@@ -62,7 +61,7 @@ onMounted(() => {
   top: 4rem;
   /* same as header height */
   left: 0;
-  width: 15.625rem;
+  width: 18rem;
   /* 250px */
   height: calc(100vh - 4rem);
   z-index: 900;

@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-import AddPermission from './AddPermission.vue';
+import AddPermission from '../components/AddPermission.vue';
 import axiosInstance from '../api/AxiosInstance';
 import { toast } from 'vue3-toastify';
 

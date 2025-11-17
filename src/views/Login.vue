@@ -19,6 +19,8 @@ const status = ref('Login')
 const error = ref(null)
 
 
+
+
 function clearError() {
     error.value = null;
 }
@@ -47,8 +49,8 @@ async function handleLogin() {
 
             // console.log(response.data)
 
-            
-    //not strictly but useful for realtime update
+
+            //not strictly but useful for realtime update
 
             userStore.setUser({
                 id: response.data.id,
@@ -73,7 +75,7 @@ async function handleLogin() {
 
             localStorage.setItem("accessToken", response.data.accessToken);
             localStorage.setItem("refreshToken", response.data.refreshToken);
-            
+
             router.push("/dashboard");
 
         } catch (err) {
@@ -85,10 +87,7 @@ async function handleLogin() {
                 if (err.response.status === 401) {
                     toast.error("Invalid credentials");
 
-
-
                 } else if (err.response.status === 404) {
-
 
                     toast.error("User not found");
 
@@ -109,10 +108,7 @@ async function handleLogin() {
 
 }
 
-
-
-
-
+const showPassword = ref(false);
 
 
 </script>
@@ -120,33 +116,28 @@ async function handleLogin() {
 <template>
 
     <div class="container">
-
         <div class="form-container">
-
             <div class="form-title">
-
                 <div class="error-class">
                     <p class="error-text">{{ error }}</p>
                 </div>
-
                 <p class="title-text">Sign In</p>
-
             </div>
-
             <form action="" @submit.prevent="handleLogin">
-
                 <div class="form-content">
-
                     <div class="email-field">
                         <input type="text" placeholder="Email" v-model="email" @click="clearError">
                     </div>
 
-                    <div class="password-field">
-                        <input type="password" placeholder="Password" v-model="password" @click="clearError">
+                    <div class="input-wrapper">
+                        <input :type="showPassword ? 'text':'password'" placeholder="Password" v-model="password" @click="clearError">
+
+                        <i class="fa-solid" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"
+                            @click="showPassword = !showPassword"></i>
                     </div>
 
                     <div class="forget-password">
-                        <p class="forgetpassword-link"><a href="#">Forget password?</a></p>
+                        <router-link to="/forget-password"> Forget password?</router-link>
                     </div>
                 </div>
 
@@ -219,7 +210,6 @@ form input {
 form input:focus {
     border: none;
     outline: none;
-
     border-left: 0.1rem solid #0099FF;
     border-right: 0.1rem solid #0099FF;
 
@@ -239,7 +229,6 @@ form input:focus {
 
 .signIn-btn {
 
-
     cursor: pointer;
     width: 100%;
     border-radius: 1.5rem;
@@ -257,5 +246,18 @@ form input:focus {
 .error-text {
     color: red;
     text-align: center;
+}
+
+
+.input-wrapper{
+    position: relative;
+}
+
+.input-wrapper i{
+    position:absolute;
+    top: 30%;
+    opacity: 0.7;
+    right: 1rem;
+    cursor: pointer;
 }
 </style>

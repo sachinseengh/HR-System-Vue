@@ -1,11 +1,11 @@
 <script setup>
-import { toast } from 'vue3-toastify';
+ 
+import { toast } from 'vue-sonner';
 import axiosInstance from '../api/AxiosInstance';
 import useUserStore from '../userStore/UserStore';
 
 
 const userStore = useUserStore()
-
 
 async function handleLogout() {
 
@@ -21,6 +21,7 @@ async function handleLogout() {
     }
 
 }
+
 </script>
 
 <template>
@@ -28,38 +29,39 @@ async function handleLogout() {
     <section class="sidebar">
 
         <div class="sidebar-items">
-            <div class="dashboard items">
+            <router-link to="/dashboard" class="dashboard items">
                 <div class="icon">
                     <i class="fa fa-solid fa-home"></i>
                 </div>
                 <div class="name">
-                    <router-link to="/dashboard">Dashboard</router-link>
+                    <div>Dashboard</div>
                 </div>
-            </div>
-            <div class="users items">
+            </router-link>
+            <router-link to="/users" class="users items">
                 <div class="icon">
                     <i class="fa fa-solid fa-users"></i>
                 </div>
                 <div class="name">
-                    <router-link to="/users">{{ userStore.isAdmin() ? 'Users' : 'Profile' }}</router-link>
+                    <div>{{ userStore.isAdmin() ? 'Users' : 'Profile' }}</div>
                 </div>
-            </div>
-            <div class="department items" v-if="userStore.isAdmin()">
+            </router-link>
+            <router-link to="/departments" class="department items" v-if="userStore.isAdmin()">
                 <div class="icon">
                     <i class="fa fa-solid fa-building-user"></i>
                 </div>
                 <div class="name">
-                    <router-link to="/departments">Departments</router-link>
+                    <div>Departments</div>
                 </div>
-            </div>
-            <div class="permission items" v-if="userStore.isAdmin()">
+            </router-link>
+
+            <router-link to="/permissions" class="permission items" v-if="userStore.isAdmin()">
                 <div class="icon">
                     <i class="fa-solid fa-fingerprint"></i>
                 </div>
                 <div class="name">
-                    <router-link to="/permissions">Permissions</router-link>
+                    <div>Permissions</div>
                 </div>
-            </div>
+            </router-link>
 
             <router-link to="/attendence" class="attendence items">
                 <div class="icon">
@@ -70,34 +72,28 @@ async function handleLogout() {
                 </div>
             </router-link>
 
-            <div class="attendence-report items" v-if="userStore.isAdmin()">
+            <router-link to="/attendence-report" class="attendence-report items" v-if="userStore.isAdmin()">
                 <div class="icon">
                     <i class="fa-solid fa-clipboard-list"></i>
                 </div>
                 <div class="name">
-                    <router-link to="/attendence-report">Attendence Report</router-link>
+                    <div to="/attendence-report">Attendence Report</div>
                 </div>
-            </div>
+            </router-link>
 
         </div>
 
         <button class="logout-btn" @click="handleLogout">
             <div class="logout items">
-
-
                 <div class="icon">
                     <i class="fa-solid fa-right-from-bracket"></i>
                 </div>
                 <div class="name">
                     <p>Logout</p>
                 </div>
-
-
             </div>
         </button>
     </section>
-
-
 </template>
 
 <style scoped>
@@ -105,14 +101,12 @@ async function handleLogout() {
 
     position: fixed;
 
-    max-width: 15rem;
+    width: 18rem;
     min-height: 99vh;
     background-color: #79b4cf8e;
     display: flex;
     flex-direction: column;
     padding: 3rem 0;
-    padding-left: 4rem;
-
     justify-content: space-between;
 
 }
@@ -120,16 +114,27 @@ async function handleLogout() {
 .sidebar-items {
     display: flex;
     flex-direction: column;
-    gap: 2.5rem;
+    gap: 1rem;
 }
 
 .items {
+    cursor: pointer;
+    margin: 0 1.4rem;
+    padding: 1rem;
+    border-radius: 7px;
     text-decoration: none;
     display: flex;
     flex-direction: row;
     gap: 1rem;
     font-size: 1.1rem;
+    color: black !important;
+    font-weight: 600;
     user-select: none;
+    transition: background-color 200ms;
+}
+
+.items:hover {
+    background-color: #259bd6bb;
 }
 
 .logout {
@@ -142,10 +147,4 @@ async function handleLogout() {
     color: black;
 }
 
-
-.logout-btn {
-
-    width: rem;
-    cursor: pointer;
-}
 </style>

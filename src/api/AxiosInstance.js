@@ -18,7 +18,7 @@ axiosInstance.interceptors.request.use(
 
     (config)=>{
 
-    const publicEndpoints = ['/login'];
+    const publicEndpoints = ['/login','forget-password','reset-password'];
 
     const isPublic = publicEndpoints.some((endpoints)=>
     config.url.includes(endpoints));
@@ -45,9 +45,9 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
 
-    (response)=> response,
+    (response) => response,
 
-    (error)=>{
+    (error) => {
 
         if(error.response && error.response.status === 401){
 
