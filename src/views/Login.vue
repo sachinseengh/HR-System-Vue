@@ -5,6 +5,8 @@ import router from '../router';
 import { toast } from 'vue3-toastify';
 import useUserStore from '../userStore/UserStore';
 import Departments from '../views/Departments.vue';
+import { jwtDecode } from 'jwt-decode';
+import permissionConstant from '../permissionConstant/PermissionConstant'
 
 
 
@@ -17,8 +19,6 @@ const status = ref('Login')
 
 
 const error = ref(null)
-
-
 
 
 function clearError() {
@@ -45,40 +45,66 @@ async function handleLogin() {
 
             const response = await axiosInstance.post("/login", payload);
 
+            if(response.status === 200) {
             toast.success("Login Success")
-
-            // console.log(response.data)
-
-
-            //not strictly but useful for realtime update
-
-            userStore.setUser({
-                id: response.data.id,
-                name: response.data.name,
-                email: response.data.email,
-                name: response.data.name,
-                department: response.data.department,
-                permissions: response.data.permissions
-
-            })
-
-
-            localStorage.setItem("user", JSON.stringify({
-                id: response.data.id,
-                email: response.data.email,
-                name: response.data.name,
-                department: response.data.department,
-                permissions: response.data.permissions
-
-
-            }));
 
             localStorage.setItem("accessToken", response.data.accessToken);
             localStorage.setItem("refreshToken", response.data.refreshToken);
 
+
+            const decodedToken = jwtDecode(response.data.accessToken);
+
+            console.log("Decoded Token"+decodedToken.permissions);
+
+            userStore.setUser({
+
+                id: decodedToken.id,
+                name: decodedToken.name,
+                email: decodedToken.email,
+                department: decodedToken.department,
+                permissions: decodedToken.permissions
+            })
+
+            userStore.setUserPermission({
+                READ_DASHBOARD: decodedToken.permissions.includes(permissionConstant.READ_DASHBOARD),
+
+                CREATE_USER: decodedToken.permissions.includes(permissionConstant.CREATE_USER),
+                READ_USER: decodedToken.permissions.includes(permissionConstant.READ_USER),
+                UPDATE_USER: decodedToken.permissions.includes(permissionConstant.UPDATE_USER),
+                DELETE_USER: decodedToken.permissions.includes(permissionConstant.DELETE_USER),
+
+                CREATE_DEPARTMENT: decodedToken.permissions.includes(permissionConstant.CREATE_DEPARTMENT),
+                READ_DEPARTMENT: decodedToken.permissions.includes(permissionConstant.READ_DEPARTMENT),
+                UPDATE_DEPARTMENT: decodedToken.permissions.includes(permissionConstant.UPDATE_DEPARTMENT),
+                DELETE_DEPARTMENT: decodedToken.permissions.includes(permissionConstant.DELETE_DEPARTMENT),
+
+                CREATE_PERMISSION: decodedToken.permissions.includes(permissionConstant.CREATE_PERMISSION),
+                READ_PERMISSION: decodedToken.permissions.includes(permissionConstant.READ_PERMISSION),
+                UPDATE_PERMISSION: decodedToken.permissions.includes(permissionConstant.UPDATE_PERMISSION),
+                DELETE_PERMISSION: decodedToken.permissions.includes(permissionConstant.DELETE_PERMISSION),
+
+                READ_ATTENDENCE: decodedToken.permissions.includes(permissionConstant.READ_ATTENDENCE),
+                CHECKIN: decodedToken.permissions.includes(permissionConstant.CHECKIN),
+                CHECKOUT: decodedToken.permissions.includes(permissionConstant.CHECKOUT),
+
+                READ_ATTENDENCE_REPORT: decodedToken.permissions.includes(permissionConstant.READ_ATTENDENCE_REPORT),
+
+                CAN_VIEW_DASHBOARD_MENU: decodedToken.permissions.some(p => String(p).startsWith("1")),
+                CAN_VIEW_USERS_MENU: decodedToken.permissions.some(p => String(p).startsWith("2")),
+                CAN_VIEW_DEPARTMENTS_MENU: decodedToken.permissions.some(p => String(p).startsWith("3")),
+                CAN_VIEW_PERMISSIONS_MENU: decodedToken.permissions.some(p => String(p).startsWith("4")),
+                CAN_VIEW_ATTENDENCE: decodedToken.permissions.some(p => String(p).startsWith("5")),
+                CAN_VIEW_ATTENDENCE_REPORT_MENU: decodedToken.permissions.some(p => String(p).startsWith("6")),
+            })
+
             router.push("/dashboard");
+            return;
+
+        }
 
         } catch (err) {
+
+            console.log(err)
 
             status.value = "failed!"
 
@@ -95,17 +121,11 @@ async function handleLogin() {
 
                     toast.error("Something not found");
                 }
-
             } else {
-
                 toast.error("Server not reached")
             }
-
         }
-
     }
-
-
 }
 
 const showPassword = ref(false);
@@ -130,7 +150,8 @@ const showPassword = ref(false);
                     </div>
 
                     <div class="input-wrapper">
-                        <input :type="showPassword ? 'text':'password'" placeholder="Password" v-model="password" @click="clearError">
+                        <input :type="showPassword ? 'text' : 'password'" placeholder="Password" v-model="password"
+                            @click="clearError">
 
                         <i class="fa-solid" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"
                             @click="showPassword = !showPassword"></i>
@@ -249,12 +270,12 @@ form input:focus {
 }
 
 
-.input-wrapper{
+.input-wrapper {
     position: relative;
 }
 
-.input-wrapper i{
-    position:absolute;
+.input-wrapper i {
+    position: absolute;
     top: 30%;
     opacity: 0.7;
     right: 1rem;

@@ -5,47 +5,33 @@ import axiosInstance from '../api/AxiosInstance';
 import { toast } from 'vue3-toastify';
 
 
-
 const totalUser = ref(0);
 const totalDepartment =ref(0);
 const totalPermission = ref(0);
 
  async function fetchCheckinCheckout(){
- 
-
 
     try{
         const response = await axiosInstance.get('/attendence/me/today');
-
-         
  
         if(response.status === 200){
         
              if(response.data){
-
-              
- 
-                if(response.data.checkin != null){
-                    
+                if(response.data.checkin != null){  
                     localStorage.setItem("checkin",JSON.stringify(true))
-                
                 }else{
                      localStorage.setItem("checkin",JSON.stringify(false))
                 }
-  
                 if(response.data.checkout != null){
                     localStorage.setItem("checkout",JSON.stringify(true))
                 }else{
                      localStorage.setItem("checkout",JSON.stringify(false))
                 }
- 
              }
         }
-
     }catch(err){
 
         if(err.response){
- 
             
             if(err.response.status ==500){
                 toast.error("Internal Server Error!");
@@ -53,7 +39,6 @@ const totalPermission = ref(0);
                 toast.error("Something Went Wrong !")
             }
         }
-
     }
 }
 
@@ -69,21 +54,21 @@ onMounted(async () => {
     fetchCheckinCheckout();
 })
 
+const { userInfo,userPermission } = useUserStore()
 
-const userStore= useUserStore();
-
-
+ 
+ 
 </script>
 
 
 <template>
 
     <section class="dashboard"> 
-        <div class="none-admin-section" v-if="!userStore.isAdmin()" >
+        <div class="none-admin-section" v-if="!userPermission.READ_DASHBOARD"  >
             <p> Welcome to The MOCO HR System</p>
         </div>
 
-        <div class="dashboard-section" v-if="userStore.isAdmin()" >
+        <div class="dashboard-section"  v-if="userPermission.READ_DASHBOARD"  >
             <div class="items-grid">
                 <div class="users-item card">
                     <p class="title">Users</p>

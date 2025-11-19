@@ -47,13 +47,13 @@ async function handleLogout() {
                 <div class="users-icon icon">
                     <router-link to="/users"><i class="fa fa-solid fa-users"></i></router-link>
                 </div>
-                <div class="department-icon icon" v-if="userStore.isAdmin()">
+                <div class="department-icon icon"  >
                     <router-link to="/departments"><i class="fa fa-solid fa-building-user"></i></router-link>
                 </div>
 
             
 
-                <div class="permission-icon icon" v-if="userStore.isAdmin()">
+                <div class="permission-icon icon"  >
                     <router-link to="/permissions"> <i class="fa-solid fa-fingerprint"></i></router-link>
                 </div>
 
@@ -67,7 +67,7 @@ async function handleLogout() {
                 </div>
 
                 
-                    <div class="attendence-report-icon icon" v-if="userStore.isAdmin()">
+                    <div class="attendence-report-icon icon"  >
                     <router-link to="/attendence-report"> <i class="fa-solid fa-clipboard-list"></i></router-link>
                 </div>
  

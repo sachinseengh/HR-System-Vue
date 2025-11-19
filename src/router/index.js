@@ -11,35 +11,28 @@ import ResetPassword from "@/views/ResetPassword.vue";
 import ForgetPassword from "@/views/ForgetPassword.vue";
 import ResetPasswordPage from "@/views/ResetPassword.vue";
 import ChangePassword from "@/components/ChangePassword.vue";
-
+import useUserStore from "@/userStore/UserStore";
+import { toast } from "vue-sonner";
 
 const routes = [
-
   {
     path: "/",
     component: Layout,
     children: [
-
-      { path: "/dashboard", name: 'dashboard', component: Dashboard },
-      { path: "/users", name: 'users', component: Users },
-      { path: "/departments", name: 'departments', component: Departments },
-      { path: "/permissions", name: 'permissions', component: Permissions },
-      { path: "/attendence", name: 'attendence', component: Attendence },
-      { path: "/attendence-report", name: 'attendence-report', component: AttendenceReport },
+      { path: "/dashboard", name: 'dashboard', component: Dashboard, meta: { permission: "CAN_VIEW_DASHBOARD_MENU" } },
+      { path: "/users", name: 'users', component: Users, meta: { permission: "CAN_VIEW_USERS_MENU" } },
+      { path: "/departments", name: 'departments', component: Departments, meta: { permission: "CAN_VIEW_DEPARTMENTS_MENU" } },
+      { path: "/permissions", name: 'permissions', component: Permissions, meta: { permission: "CAN_VIEW_PERMISSIONS_MENU" } },
+      { path: "/attendence", name: 'attendence', component: Attendence, meta: { permission: "CAN_VIEW_ATTENDENCE" } },
+      { path: "/attendence-report", name: 'attendence-report', component: AttendenceReport, meta: { permission: "CAN_VIEW_ATTENDENCE_REPORT_MENU" } },
       { path: "/change-password", name: 'change-password', component: ChangePassword },
     ]
   },
-
   { path: "/login", name: 'login', component: Login },
   { path: "/forget-password", name: 'forget-password', component: ForgetPassword },
   { path: "/reset-password", name: 'reset-password', component: ResetPassword },
-
-  {
-    path: '/:pathMatch(.*)*',
-    redirect: "/dashboard"
-  },
-
-]
+  { path: '/:pathMatch(.*)*', redirect: "/dashboard" },
+];
 
 
 const router = createRouter({
@@ -48,7 +41,9 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
+
   const token = localStorage.getItem("accessToken");
+  const store = useUserStore();
 
   // Routes that do NOT require login
   const publicPages = ['login', 'reset-password', 'forget-password'];
@@ -59,16 +54,31 @@ router.beforeEach((to, from, next) => {
   }
 
   if (!isPublicPage && !token) {
+
     next({ name: 'login' });
-  } else if (to.name === 'login' && token) {
-    next({ name: 'dashboard' });
-  } else if (to.name === 'reset-password' && token) {
 
-    next({name:'dashboard'})
-
-  } else {
-    next(); // allow route
   }
+
+  if (to.name === 'login' && token) {
+
+    next({ name: 'dashboard' });
+
+  }
+
+  if (to.name === 'reset-password' && token) {
+
+    next({ name: 'dashboard' })
+  }
+
+  const requiredPermission = to.meta.permission;
+  if (requiredPermission && !store.userPermission[requiredPermission]) {
+    // Optionally show toast
+    toast.error("You do not have permission to access this page");
+    return next({ name: 'dashboard' }); // redirect to dashboard or 403 page
+  }
+
+  next(); // allow route
+
 });
 
 export default router;

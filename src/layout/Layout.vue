@@ -5,15 +5,6 @@ import Header from '../components/Header.vue';
 import SideBar from '../components/SideBar.vue';
 import useUserStore from '../userStore/UserStore';
 
-const userStore = useUserStore();
-
-onMounted(() => {
-
-  userStore.loadUser();
-
-
-});
-
 
 </script>
 

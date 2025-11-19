@@ -21,15 +21,41 @@ const permissions = ref([{}]);
 
 async function getUserAndPermission() {
 
+  try{
   const response = await axiosInstance.get("http://localhost:7071/user");
 
+  if(response.status === 200) {
   const data = await response.data;
   users.value = data;
+  }
+  } catch (err) {
 
+    if(err.response){
+      if(err.response.status === 403){
+        toast.error("Not Authorized!")
+        return;
+        
+      }
+    }
+  }
+
+  try{
   const PermResponse = await axiosInstance.get("http://localhost:7071/permission");
 
+  if(PermResponse.status === 200) {
   const PermData = await PermResponse.data;
   permissions.value = PermData;
+  }
+
+  } catch(err) {
+    if(err.response) {
+
+      if(err.response.status === 403){
+        toast.error("Not Authorized!");
+        return;
+      }
+    }
+  }
 
 
 }
@@ -113,7 +139,7 @@ function viewAttendenceReport(userId) {
 
     <div class="users-section">
 
-      <div class="add-user" v-if="userStore.isAdmin()">
+      <div class="add-user"  >
         <div class="createUser">
           <button class="createUserBtn" @click="showUserAddingForm = !showUserAddingForm">Add Employee <i
               class="fa-solid fa-user-plus"></i></button>
@@ -128,7 +154,7 @@ function viewAttendenceReport(userId) {
         </div>
       </div>
 
-      <div class="users-table" v-if="userStore.isAdmin()">
+      <div class="users-table"  v-if="userStore.userPermission.READ_USER">
         <table class="table table-striped table-hover custom-table">
           <thead>
             <tr>
@@ -136,7 +162,7 @@ function viewAttendenceReport(userId) {
               <th>Name</th>
               <th>email</th>
               <th>department</th>
-              <th>permission</th>
+             
               <th>Actions</th>
             </tr>
           </thead>
@@ -148,18 +174,7 @@ function viewAttendenceReport(userId) {
               <td>{{ user.name }}</td>
               <td>{{ user.email }}</td>
               <td>{{ user.department?.name }}</td>
-              <td style="display: flex;">
-
-                <div v-for="permission in permissions" :key="permission.id"
-                  style="display: flex; column-gap: 0.2rem; margin-right: 0.3rem;">
-
-
-                  <input type="checkbox" :checked="user.permission?.some(p => p.id === permission.id)" disabled />
-                  <p>{{ permission.name?.charAt(0) }}</p>
-                </div>
-
-
-              </td>
+             
               <td class="actions">
 
                 <i class="fa-solid fa-calendar-days" @click="viewAttendenceReport(user.id)"></i>
@@ -175,7 +190,7 @@ function viewAttendenceReport(userId) {
           </tbody>
         </table>
       </div>
-      <div class="users-table" v-if="!userStore.isAdmin()">
+      <div class="users-table" v-if="!userStore.userPermission.DELETE_USER">
         <table class="table table-striped table-hover custom-table">
           <thead>
             <tr>

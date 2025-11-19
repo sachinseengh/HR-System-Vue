@@ -49,13 +49,19 @@ axiosInstance.interceptors.response.use(
 
     (error) => {
 
+        if(error.response && error.response.status === 403){
+                router.push("/");
+
+            
+        }
+
         if(error.response && error.response.status === 401){
-
-
             localStorage.removeItem("accessToken");
             localStorage.removeItem("refreshToken");
-            localStorage.removeItem("user");
+            toast.error("Session End! Please Login Again!");
             router.push("/login");
+                
+            
         }
         return Promise.reject(error)
     }

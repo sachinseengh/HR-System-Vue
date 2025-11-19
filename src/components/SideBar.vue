@@ -1,106 +1,77 @@
 <script setup>
- 
 import { toast } from 'vue-sonner';
 import axiosInstance from '../api/AxiosInstance';
 import useUserStore from '../userStore/UserStore';
+import { computed } from 'vue';
+import router from '@/router';
 
+const userStore = useUserStore();
 
-const userStore = useUserStore()
+// Sidebar computed based on permissions, guard against undefined
+const sidebar = computed(() => {
+  const perm = userStore.userPermission;
+
+  if (!perm) return []; // <- early return if permissions not loaded
+
+  return [
+    { name: "Dashboard", path: "/dashboard", icon: "fa fa-solid fa-home", showMenu: perm?.CAN_VIEW_DASHBOARD_MENU },
+    { name: "Users", path: "/users", icon: "fa fa-solid fa-users", showMenu: perm?.CAN_VIEW_USERS_MENU },
+    { name: "Departments", path: "/departments", icon: "fa fa-solid fa-building-user", showMenu: perm?.CAN_VIEW_DEPARTMENTS_MENU },
+    { name: "Permissions", path: "/permissions", icon: "fa fa-solid fa-fingerprint", showMenu: perm?.CAN_VIEW_PERMISSIONS_MENU },
+    { name: "Attendance", path: "/attendence", icon: "fa fa-solid fa-user-clock", showMenu: perm?.CAN_VIEW_ATTENDENCE },
+    { name: "Attendance Report", path: "/attendence-report", icon: "fa fa-solid fa-clipboard-list", showMenu: perm?.CAN_VIEW_ATTENDENCE_REPORT_MENU },
+  ];
+});
 
 async function handleLogout() {
+  try {
+    const response = await axiosInstance.get("/logout");
 
-    try {
-        const response = await axiosInstance.get("/logout");
-
-        if (response.status === 401) {
-            toast.success("Logout Success!")
-        }
-
-    } catch (err) {
-        toast.success("Logout Success!")
+    if(response.status === 200){
+        router.push("/login");
+        toast.success("Logout Success")
     }
+  } catch (err) {
+    // ignore errors
+    toast.error('Something went wrong !');
+  }
 
+  userStore.logout();
 }
-
 </script>
 
 <template>
-
-    <section class="sidebar">
-
-        <div class="sidebar-items">
-            <router-link to="/dashboard" class="dashboard items">
-                <div class="icon">
-                    <i class="fa fa-solid fa-home"></i>
-                </div>
-                <div class="name">
-                    <div>Dashboard</div>
-                </div>
-            </router-link>
-            <router-link to="/users" class="users items">
-                <div class="icon">
-                    <i class="fa fa-solid fa-users"></i>
-                </div>
-                <div class="name">
-                    <div>{{ userStore.isAdmin() ? 'Users' : 'Profile' }}</div>
-                </div>
-            </router-link>
-            <router-link to="/departments" class="department items" v-if="userStore.isAdmin()">
-                <div class="icon">
-                    <i class="fa fa-solid fa-building-user"></i>
-                </div>
-                <div class="name">
-                    <div>Departments</div>
-                </div>
-            </router-link>
-
-            <router-link to="/permissions" class="permission items" v-if="userStore.isAdmin()">
-                <div class="icon">
-                    <i class="fa-solid fa-fingerprint"></i>
-                </div>
-                <div class="name">
-                    <div>Permissions</div>
-                </div>
-            </router-link>
-
-            <router-link to="/attendence" class="attendence items">
-                <div class="icon">
-                    <i class="fa-solid fa-user-clock"></i>
-                </div>
-                <div class="name">
-                    <div>Attendence</div>
-                </div>
-            </router-link>
-
-            <router-link to="/attendence-report" class="attendence-report items" v-if="userStore.isAdmin()">
-                <div class="icon">
-                    <i class="fa-solid fa-clipboard-list"></i>
-                </div>
-                <div class="name">
-                    <div to="/attendence-report">Attendence Report</div>
-                </div>
-            </router-link>
-
+  <section class="sidebar">
+    <div class="sidebar-items">
+      <router-link
+        v-for="menu in sidebar"
+        :key="menu.name"
+         v-show="menu.showMenu"
+        :to="menu.path"
+        class="dashboard items"
+      >
+        <div class="icon">
+          <i :class="menu.icon"></i>
         </div>
+        <div class="name">{{ menu.name }}</div>
+      </router-link>
+    </div>
 
-        <button class="logout-btn" @click="handleLogout">
-            <div class="logout items">
-                <div class="icon">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                </div>
-                <div class="name">
-                    <p>Logout</p>
-                </div>
-            </div>
-        </button>
-    </section>
+    <button class="logout-btn" @click="handleLogout">
+      <div class="logout items">
+        <div class="icon">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </div>
+        <div class="name"><p>Logout</p></div>
+      </div>
+    </button>
+  </section>
 </template>
+
 
 <style scoped>
 .sidebar {
-
     position: fixed;
-
     width: 18rem;
     min-height: 99vh;
     background-color: #79b4cf8e;
@@ -108,7 +79,6 @@ async function handleLogout() {
     flex-direction: column;
     padding: 3rem 0;
     justify-content: space-between;
-
 }
 
 .sidebar-items {
@@ -122,7 +92,6 @@ async function handleLogout() {
     margin: 0 1.4rem;
     padding: 1rem;
     border-radius: 7px;
-    text-decoration: none;
     display: flex;
     flex-direction: row;
     gap: 1rem;
@@ -146,5 +115,4 @@ async function handleLogout() {
     text-decoration: none;
     color: black;
 }
-
 </style>

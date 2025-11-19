@@ -4,7 +4,7 @@ import { onMounted, reactive, ref, watch } from 'vue';
 import axiosInstance from '../api/AxiosInstance';
 import { toast } from 'vue3-toastify';
 
-const userEmit = defineEmits(['user-added'],['user-updated'],['user-props-cleared']);
+const userEmit = defineEmits(['user-added'], ['user-updated'], ['user-props-cleared']);
 
 const selectedPermissionsId = ref([]);
 const name = ref('');
@@ -14,6 +14,8 @@ const department = ref(null);
 
 const permissions = ref([]);
 const departments = ref([]);
+
+const permissionSection = ref([]);
 
 
 const props = defineProps({
@@ -40,14 +42,51 @@ watch(() => props.user, (newUserToEdit) => {
 }, { immediate: true });
 
 onMounted(async () => {
-    const response = await fetch("http://localhost:7071/department");
-    const data = await response.json();
-    departments.value = data;
+
+    try {
+
+        const response = await axiosInstance.get("/department");
+        if (response.status === 200) {
+
+            const data = await response.data;
+            departments.value = data;
+
+        }
+
+    } catch (err) {
+
+        if (err.response) {
+            if (err.response.status === 403) {
+                toast.error("Not Authorized!");
+            } else if (err.response.status === 401) {
+                toast.error("No Token")
+            }
+        }
+    }
+
+    try {
+
+        const PermResponse = await axiosInstance.get("/permission");
+
+        if (PermResponse.status === 200) {
+
+            const PermData = await PermResponse.data;
+            permissions.value = PermData;
+
+            permissionSection.value = [...new Set(permissions.value.map(p => p.section))]
+        }
 
 
-    const PermResponse = await fetch("http://localhost:7071/permission");
-    const PermData = await PermResponse.json();
-    permissions.value = PermData;
+    } catch (err) {
+        if (err.response) {
+
+            if (err.response.status === 403) {
+                toast.error("Not Authorized!");
+            } else if (err.response.status === 401) {
+                toast.error("No Token")
+            }
+        }
+    }
 })
 
 async function submitForm() {
@@ -68,30 +107,44 @@ async function submitForm() {
     try {
 
         if (props.user) {
-            
-            const response = await axiosInstance.put(`/user?user_id=${props.user.id}`, payload);
-            toast.success("User Updated Successfully")
 
-            userEmit('user-updated');
-            cancelForm();
+            try {
+                const response = await axiosInstance.put(`/user?user_id=${props.user.id}`, payload); ''
 
+                if (response.status === 200) {
+                    toast.success("User Updated Successfully")
+                    userEmit('user-updated');
+                    cancelForm();
+                }
+            } catch (err) {
+                if (err.response.status === 403) {
+                    toast.error("Not Authroized");
+                }
+            }
         } else {
+            try {
 
-            console.log("create user payload : "+ payload.permissions)
- 
-            const response = await axiosInstance.post("/user", payload)
+                const response = await axiosInstance.post("/user", payload)
 
-            toast.success("user added successfully!");
+                if (response.status === 200) {
+                    toast.success("user added successfully!");
 
-            userEmit('user-added');
-            cancelForm();
+                    userEmit('user-added');
+                    cancelForm();
+                }
+
+            } catch (err) {
+                if (err.response.status === 403) {
+                    toast.error("Not Authroized");
+                }
+            }
         }
 
     } catch (err) {
 
         if (err.response.status === 409) {
-             toast.error("Email already exists")
-        }else if(err.response.status === 500){
+            toast.error("Email already exists")
+        } else if (err.response.status === 500) {
             toast.error("Server Error")
         }
     }
@@ -101,9 +154,9 @@ function cancelForm() {
 
     userEmit('user-props-cleared')
 
-    name.value=''
-    email.value=''
-     selectedPermissionsId.value=[]
+    name.value = ''
+    email.value = ''
+    selectedPermissionsId.value = []
 }
 
 </script>
@@ -111,7 +164,7 @@ function cancelForm() {
 <template>
     <section class="add-user-form">
         <div class="user-form">
-            <form  @submit.prevent="submitForm">
+            <form @submit.prevent="submitForm">
                 <div class="form-class">
                     <div class="Name item">
                         <P>Name: </P>
@@ -120,11 +173,13 @@ function cancelForm() {
 
                     <div class="Password item">
                         <P>Password: </P>
-                        <input type="text" placeholder="Enter password !" v-model="password" :disabled="props.user ? true:false ">
+                        <input type="text" placeholder="Enter password !" v-model="password"
+                            :disabled="props.user ? true : false">
                     </div>
                     <div class="email item">
                         <P>Email: </P>
-                        <input type="text" placeholder="Enter Email !" v-model="email" :disabled="props.user ? true:false ">
+                        <input type="text" placeholder="Enter Email !" v-model="email"
+                            :disabled="props.user ? true : false">
                     </div>
 
                     <div class="Department item">
@@ -136,22 +191,25 @@ function cancelForm() {
                         </Select>
                     </div>
 
-                    <div class="Permission item">
-                        <p>Permissions:</p>
-                        <div class="permission-checkbox" v-for="permission in permissions"
-                            style="display: flex; margin-right: 0.2rem; gap:0.2rem">
-
-                            <input type="checkbox" :value="permission.id" v-model="selectedPermissionsId">
-                            <p>{{ permission.name?.charAt(0) }}</p>
+                </div>
+                <div class="permission">
+                        <p class="permission-title">Permission:</p>
+                        <div class="permission-section" v-for="section in permissionSection" :key="section">
+                            <p class="section-title">{{ section }}</p>
+                            <div class="section-permissions">
+                                <label v-for="permission in permissions" v-show="permission.section === section"
+                                    :key="permission.id" class="permission-checkbox" >
+                                    <input type="checkbox" :value="permission.id" v-model="selectedPermissionsId" />
+                                    {{ String(permission.name).toLowerCase() }}
+                                </label>
+                            </div>
                         </div>
                     </div>
-
-                </div>
 
                 <div class="submitAndCancelBtn">
 
                     <div class="cancelBtn btn">
-                        <button type="button"  @click="cancelForm">cancel</button>
+                        <button type="button" @click="cancelForm">cancel</button>
                     </div>
 
                     <div class="submitBtn btn">
@@ -244,5 +302,45 @@ function cancelForm() {
 .cancelBtn button {
     background-color: rgba(255, 0, 0, 0.809);
 
+}
+
+.permissions-checkbox {
+    display: flex;
+    flex-direction: row;
+    
+}
+.permission {
+    margin-top: 2rem;
+}
+
+.permission-title{
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.permission-section {
+    margin-bottom: 1rem;
+}
+
+.section-title {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.section-permissions {
+    display: flex;
+    /* make checkboxes horizontal */
+    gap: 1rem;
+    /* spacing between checkboxes */
+    flex-wrap: wrap;
+    /* wrap if too many checkboxes */
+}
+
+.permission-checkbox {
+    display: flex;
+    /* checkbox and label inline */
+    align-items: center;
+    /* vertically center checkbox and text */
+    gap: 0.3rem;
 }
 </style>
