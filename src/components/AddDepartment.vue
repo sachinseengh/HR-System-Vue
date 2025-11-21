@@ -1,12 +1,13 @@
 <script setup>
 import { ref, watch } from 'vue';
 import axiosInstance from '../api/AxiosInstance';
-import { toast } from 'vue3-toastify';
+import { toast } from 'vue-sonner';
+ 
 
 
 const name = ref('');
 
-const emit = defineEmits(['department-added'],['clear-department'])
+const emit = defineEmits(['department-added'], ['clear-department'])
 
 
 const editProps = defineProps({
@@ -18,7 +19,7 @@ const editProps = defineProps({
 
 
 watch(() => editProps.department, (newDepartment) => {
- 
+
 
     if (newDepartment) {
         name.value = newDepartment.name;
@@ -34,36 +35,56 @@ async function handleForm() {
 
     try {
         if (editProps.department) {
- 
-            const response = await axiosInstance.put(`/department/${editProps.department.id}`,payload)
 
+            try {
 
-            if(response.status === 200){
-                toast.success("Department Updated Successfully");
+                const response = await axiosInstance.put(`/department/${editProps.department.id}`, payload)
+
+                if (response.status === 200) {
+                    toast.success("Department Updated Successfully");
+
+                    emit('department-added')
+                }
+            } catch (err) {
+              
+                if (err.response) {
+                    if (err.response.status === 403) {
+                        toast.error("You are not Authorized !")
+                    }
+                }
+            }
+
+        } else {
+
+            try {
+
+                const response = await axiosInstance.post("/department", payload);
+
+                toast.success("Department Added!")
 
                 emit('department-added')
+
+            } catch(err) {
+                if(err.response) {
+                    if(err.response.status === 403){
+                        toast.error("You are not Authorized !");
+                    }
+                }
             }
-            
-        } else {
-            const response = await axiosInstance.post("/department", payload);
-  
-
-            toast.success("Department Added!")
-
-            emit('department-added')
+          
             
         }
 
     } catch (err) {
-         toast.error("Failed to Add Department!")
+        toast.error("Failed to Add Department!")
     }
 
 
 }
 
-function cancelForm(){
-    name.value=''
-    emit('clear-department')  
+function cancelForm() {
+    name.value = ''
+    emit('clear-department')
 }
 
 
@@ -87,7 +108,7 @@ function cancelForm(){
                     </div>
 
                     <div class="submitBtn btn">
-                        <button type="submit">{{ editProps.department?'Update':'Add' }}</button>
+                        <button type="submit">{{ editProps.department ? 'Update' : 'Add' }}</button>
                     </div>
                 </div>
             </form>

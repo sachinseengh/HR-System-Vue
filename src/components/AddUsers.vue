@@ -2,7 +2,8 @@
 import axios from 'axios';
 import { onMounted, reactive, ref, watch } from 'vue';
 import axiosInstance from '../api/AxiosInstance';
-import { toast } from 'vue3-toastify';
+import { toast } from 'vue-sonner';
+ 
 
 const userEmit = defineEmits(['user-added'], ['user-updated'], ['user-props-cleared']);
 
@@ -38,6 +39,8 @@ watch(() => props.user, (newUserToEdit) => {
 
         selectedPermissionsId.value = newUserToEdit.permission?.map(p => p.id) || []
     }
+
+    console.log("currentPermission------------->"+selectedPermissionsId)
 
 }, { immediate: true });
 
@@ -90,11 +93,13 @@ onMounted(async () => {
 })
 
 async function submitForm() {
+  
 
     if (department.value == null) {
-        alert("select department");
+        toast.error("select department");
         return
     }
+   
 
     const payload = {
         name: name.value,
@@ -103,11 +108,10 @@ async function submitForm() {
         department: department.value,
         permissions: selectedPermissionsId.value
     }
+     
 
     try {
-
         if (props.user) {
-
             try {
                 const response = await axiosInstance.put(`/user?user_id=${props.user.id}`, payload); ''
 
@@ -141,12 +145,14 @@ async function submitForm() {
         }
 
     } catch (err) {
+        if(err.response){
 
         if (err.response.status === 409) {
             toast.error("Email already exists")
         } else if (err.response.status === 500) {
             toast.error("Server Error")
         }
+    }
     }
 }
 
@@ -199,7 +205,7 @@ function cancelForm() {
                             <div class="section-permissions">
                                 <label v-for="permission in permissions" v-show="permission.section === section"
                                     :key="permission.id" class="permission-checkbox" >
-                                    <input type="checkbox" :value="permission.id" v-model="selectedPermissionsId" />
+                                    <input type="checkbox" :value="permission.id" v-model="selectedPermissionsId" :checked="selectedPermissionsId.some(p=>p === permission.id)" />
                                     {{ String(permission.name).toLowerCase() }}
                                 </label>
                             </div>

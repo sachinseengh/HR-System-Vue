@@ -35,9 +35,7 @@ importers:
       vue-sonner:
         specifier: ^2.0.9
         version: 2.0.9
-      vue3-toastify:
-        specifier: ^0.2.8
-        version: 0.2.8(vue@3.5.24)
+   
     devDependencies:
       '@vitejs/plugin-vue':
         specifier: ^6.0.1
@@ -1060,15 +1058,7 @@ packages:
         optional: true
       nuxt:
         optional: true
-
-  vue3-toastify@0.2.8:
-    resolution: {integrity: sha512-8jDOqsJaBZEbGpCbhWDETJc11D1lZefvgFPq/IPdM+U7+qyXoVPDvK6uq/FIgyV7qV0NcNzvGBMEzjsLQqGROw==}
-    engines: {node: '>=20', npm: '>=9.0.0'}
-    peerDependencies:
-      vue: '>=3.2.0'
-    peerDependenciesMeta:
-      vue:
-        optional: true
+ 
 
   vue@3.5.24:
     resolution: {integrity: sha512-uTHDOpVQTMjcGgrqFPSb8iO2m1DUvo+WbGqoXQz8Y1CeBYQ0FXf2z1gLRaBtHjlRz7zZUBHxjVB5VTLzYkvftg==}
@@ -2049,10 +2039,7 @@ snapshots:
       vue: 3.5.24
 
   vue-sonner@2.0.9: {}
-
-  vue3-toastify@0.2.8(vue@3.5.24):
-    optionalDependencies:
-      vue: 3.5.24
+ 
 
   vue@3.5.24:
     dependencies:

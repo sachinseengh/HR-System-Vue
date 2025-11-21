@@ -2,11 +2,12 @@
 import { ref } from 'vue';
 import axiosInstance from '../api/AxiosInstance';
 import router from '../router';
-import { toast } from 'vue3-toastify';
+ 
 import useUserStore from '../userStore/UserStore';
 import Departments from '../views/Departments.vue';
 import { jwtDecode } from 'jwt-decode';
 import permissionConstant from '../permissionConstant/PermissionConstant'
+import { toast } from 'vue-sonner';
 
 
 
@@ -45,7 +46,7 @@ async function handleLogin() {
 
             const response = await axiosInstance.post("/login", payload);
 
-            if(response.status === 200) {
+            
             toast.success("Login Success")
 
             localStorage.setItem("accessToken", response.data.accessToken);
@@ -100,22 +101,16 @@ async function handleLogin() {
             router.push("/dashboard");
             return;
 
-        }
 
         } catch (err) {
-
-            console.log(err)
-
+           
+ 
             status.value = "failed!"
 
             if (err.response) {
 
-                if (err.response.status === 401) {
+                if (err.response.status === 404) {
                     toast.error("Invalid credentials");
-
-                } else if (err.response.status === 404) {
-
-                    toast.error("User not found");
 
                 } else {
 

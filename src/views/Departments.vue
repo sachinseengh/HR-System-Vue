@@ -2,8 +2,10 @@
 import { onMounted, ref } from 'vue';
 import AddDepartment from '../components/AddDepartment.vue';
 import axiosInstance from '../api/AxiosInstance';
-import { toast } from 'vue3-toastify';
-
+import { toast } from 'vue-sonner';
+import useUserStore from '@/userStore/UserStore';
+ 
+const {userPermission} = useUserStore();
  const departments = ref([]);
 
 
@@ -14,6 +16,11 @@ const showDepartment = ref(false);
 
   function editDepartment(department){
 
+    if(!userPermission.UPDATE_DEPARTMENT){
+      toast.error("You are not authorized");
+      return;
+    }
+
     departmentToEdit.value = department;
     showDepartment.value=true;
   
@@ -22,9 +29,13 @@ const showDepartment = ref(false);
 
 async function deleteDepartment(departmentId){
 
+  if(userPermission.DELETE_DEPARTMENT){
+    toast.error("You are not authorized");
+    return
+  }
+
   try{
-
-
+ 
     const response = await axiosInstance.delete(`/department/${departmentId}`)
 
 
@@ -32,22 +43,22 @@ async function deleteDepartment(departmentId){
 
     toast.success("Department Deleted!")
 
-
     loadDepartment();
-
     }
-
 
   }catch(err){
 
     if(err.response){
       if(err.response.status===404){
         toast.error("Department Not Found !");
-      }else if(err.response.status ==403){
-        toast.error("User assigned to this department")
+
+      }else if(err.response.status === 400){
+        toast.error("User assigned to this department");
+
+      }else if(err.response.status === 403) {
+        toast.error("You are not authorized");
       }
     }
-   
 
   }
  }
@@ -73,7 +84,7 @@ onMounted( ()=>{loadDepartment()});
 <template>
   <section class="departments">
 
-    <div class="departmentAdd">
+    <div class="departmentAdd" v-if="userPermission.CREATE_DEPARTMENT">
       <div class="departmentAddBtn">
         <button class="addDepartmentBtn" @click="showDepartment=!showDepartment">Add Department <i class="fa-solid fa-user-plus"></i>
          </button>

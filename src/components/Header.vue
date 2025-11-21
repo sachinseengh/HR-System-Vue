@@ -41,6 +41,9 @@ const handleChangePassword = () => {
                     <div @click="handleChangePassword" class="change-password hide" id="change-password" v-if="showChangePassword">
                         <p>Change Password</p>
                     </div>
+
+
+                    
                 </div>
             </div>
 

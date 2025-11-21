@@ -2,18 +2,23 @@
 import { onMounted, ref } from 'vue';
 import AddPermission from '../components/AddPermission.vue';
 import axiosInstance from '../api/AxiosInstance';
-import { toast } from 'vue3-toastify';
+import { toast } from 'vue-sonner';
+import useUserStore from '@/userStore/UserStore';
+ 
 
 const showAddPermission = ref(false);
 const permissionToEdit=ref(null);
 
 
-
+const {userPermission} = useUserStore();
 
 function editPermission(permission){
 
-
-
+  if(!userPermission.UPDATE_PERMISSION){
+    toast.error("You are not authorized !");
+    return;
+  }
+  
   window.scrollTo({
     top:0,
     behavior:"smooth"
@@ -28,35 +33,45 @@ function editPermission(permission){
 
 async function deletePermission(permissionId){
 
+
+   if(!userPermission.DELETE_PERMISSION){
+    toast.error("You are not authorized !");
+    return;
+  }
+
   try{
 
     const response = await axiosInstance.delete(`/permission/${permissionId}`)
 
-    if(response.status === 200){
       toast.success("Permission Deleted Successfully !")
       loadPermission()
-    }
     
+
   }catch(err){
 
     if(err.response){
       if(err.response.status === 404){
         toast.error("Permission Not Found!")
+      }else if(err.response.status === 401){
+        toast.error("You are not authorized !");
+      }else if(err.response.status === 400){
+        toast.error("User have this permission !")
       }
     }
 
   }
 
 }
-
-
-
+ 
 const permissions = ref([]);
 
  
 
 async  function loadPermission(){
 
+  console.log(Object.entries(userPermission));
+
+  try{
   const response = await  axiosInstance.get("/permission");
 
   const data = await response.data;
@@ -64,6 +79,13 @@ async  function loadPermission(){
 
   showAddPermission.value=false;
 
+  } catch(err) {
+    if(err.response){
+      if(err.response.status === 403){
+        toast.error("You are not authorized !")
+      }
+    }
+  }
 }
 
 onMounted( ()=>{loadPermission()})
@@ -78,7 +100,7 @@ function clearEmit(){
 <template>
   <section class="permissions">
 
-    <div class="permissionAdd">
+    <div class="permissionAdd" v-if="userPermission.CREATE_PERMISSION">
       <div class="permissionAddBtn">
         <button class="addpermissionBtn" @click="showAddPermission=!showAddPermission">Add permission <i class="fa-solid fa-user-plus"></i>
          </button>
@@ -96,14 +118,15 @@ function clearEmit(){
           <thead>
             <tr>
               <th>Id</th>
+              <th>Section</th>
               <th>Name</th>
-            
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(permission, index) in permissions" :key="index">
               <td>{{ permission.id }}</td>
+              <td>{{ permission.section }}</td>
               <td>{{ permission.name}}</td>
               <td> 
                 <i class="fa-solid fa-pen-to-square" @click="editPermission(permission)"></i>

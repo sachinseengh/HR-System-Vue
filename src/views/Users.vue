@@ -139,7 +139,7 @@ function viewAttendenceReport(userId) {
 
     <div class="users-section">
 
-      <div class="add-user"  >
+      <div class="add-user" v-if="userStore.userPermission.CREATE_USER"  >
         <div class="createUser">
           <button class="createUserBtn" @click="showUserAddingForm = !showUserAddingForm">Add Employee <i
               class="fa-solid fa-user-plus"></i></button>
@@ -190,7 +190,8 @@ function viewAttendenceReport(userId) {
           </tbody>
         </table>
       </div>
-      <div class="users-table" v-if="!userStore.userPermission.DELETE_USER">
+      <div class="users-table" v-if="!userStore.userPermission.CREATE_USER && !userStore.userPermission.READ_USER">
+       
         <table class="table table-striped table-hover custom-table">
           <thead>
             <tr>

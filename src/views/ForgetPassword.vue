@@ -2,7 +2,7 @@
 import axiosInstance from '@/api/AxiosInstance';
 import router from '@/router';
 import { ref } from 'vue';
-import { toast } from 'vue3-toastify';
+ 
 
 const email = ref('');
 const status= ref("Submit");

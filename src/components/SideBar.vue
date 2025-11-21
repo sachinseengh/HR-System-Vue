@@ -28,6 +28,11 @@ async function handleLogout() {
     const response = await axiosInstance.get("/logout");
 
     if(response.status === 200){
+
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("checkin");
+      localStorage.removeItem("checkout");
         router.push("/login");
         toast.success("Logout Success")
     }

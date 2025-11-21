@@ -1,8 +1,9 @@
 import axios from "axios";
 import router from "../router";
-import { toast } from "vue3-toastify";
-
-
+import { toast } from "vue-sonner";
+import { ref } from "vue";
+ 
+ 
 const axiosInstance = axios.create({
 
     baseURL:"http://localhost:7071",
@@ -12,6 +13,7 @@ const axiosInstance = axios.create({
     },
     timeout:10000
 })
+ 
 
 
 axiosInstance.interceptors.request.use(
@@ -27,6 +29,7 @@ axiosInstance.interceptors.request.use(
         return config;
     }
         const token = localStorage.getItem("accessToken");
+    
 
         if(!token){
             router.push('/login')
@@ -49,13 +52,10 @@ axiosInstance.interceptors.response.use(
 
     (error) => {
 
-        if(error.response && error.response.status === 403){
-                router.push("/");
-
-            
-        }
+      
 
         if(error.response && error.response.status === 401){
+            
             localStorage.removeItem("accessToken");
             localStorage.removeItem("refreshToken");
             toast.error("Session End! Please Login Again!");
