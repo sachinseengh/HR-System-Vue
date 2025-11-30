@@ -14,10 +14,7 @@ const handleChangePassword = () => {
     router.push("/change-password");
     showChangePassword.value = false;
 }
-
 </script>
-
-
 
 <template>
     <section class="header">
@@ -29,10 +26,12 @@ const handleChangePassword = () => {
                         <router-link to="/dashboard"> <img src="../assets/com-logo.png" alt=""></img></router-link>
                     </div>
                 </div>
+                
+               
 
                 <div class="profile">
-                    <div class="icon">
-                        <i class="fa-solid fa-user"></i>
+                    <div class="profile-image">
+                         <img :src="userStore.userInfo.profileImageURL" alt="profile">
                     </div>
                     <div class="welcome-user" id="welcome-user" @click="showChangePassword =!showChangePassword">
                         <p>Welcome,</p>
@@ -81,7 +80,8 @@ const handleChangePassword = () => {
 .profile {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items:center;
+    gap:1rem;
 }
 
 .profile .icon i {
@@ -109,5 +109,14 @@ a{
 
 .welcome-user {
     cursor: pointer;
+}
+
+.profile-image img{
+
+    width: 3rem;
+    height: 3rem;
+    object-fit: contain;
+    border-radius: 50%;
+    border:2px solid rgb(84, 80, 80);
 }
 </style>

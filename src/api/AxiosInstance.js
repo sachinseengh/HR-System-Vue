@@ -7,10 +7,16 @@ import { ref } from "vue";
 const axiosInstance = axios.create({
 
     baseURL:"http://localhost:7071",
-    headers:{
-        "Content-Type":"application/json",
 
-    },
+
+// axios automatically send the application/json so no need to do and also affect the multipart/form data
+
+
+// the multipart/form-data should be sent when needed according to api;
+    // headers:{
+    //     // "Content-Type":"application/json",
+            
+    // },
     timeout:10000
 })
  

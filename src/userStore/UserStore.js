@@ -12,7 +12,8 @@ const useUserStore = defineStore('user', () => {
     name: "",
     email: "",
     department: {},
-    permissions: []
+    permissions: [],
+    profileImageURL:""
   });
 
   const userPermission = ref({
@@ -66,7 +67,8 @@ const useUserStore = defineStore('user', () => {
         name: decoded.name || "",
         email: decoded.email || "",
         department: decoded.department || {},
-        permissions: decoded.permissions || []
+        permissions: decoded.permissions || [],
+        profileImageURL:decoded.profileImageURL
       };
     } catch (err) {
       console.error("Error decoding token in loadUser:", err);

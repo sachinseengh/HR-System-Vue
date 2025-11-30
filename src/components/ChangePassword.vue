@@ -137,17 +137,14 @@ const handleForm = async () => {
 
                         <i class="fa-solid" :class="showNew ? 'fa-eye-slash' : 'fa-eye'"
                             @click="showNew = !showNew"></i>
-
                     </div>
 
                     <div class="input-wrapper">
-
                         <input  :type= "showConfirm?'text':'password'" placeholder="Confirm Password" v-model="confirmPassword"
                             required></input>
 
                         <i class="fa-solid" :class="showCurrent ? 'fa-eye-slash' : 'fa-eye'"
                             @click="showConfirm = !showConfirm"></i>
-
                     </div>
          
                 </div>

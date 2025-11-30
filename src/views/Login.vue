@@ -2,14 +2,11 @@
 import { ref } from 'vue';
 import axiosInstance from '../api/AxiosInstance';
 import router from '../router';
- 
-import useUserStore from '../userStore/UserStore';
-import Departments from '../views/Departments.vue';
+
 import { jwtDecode } from 'jwt-decode';
-import permissionConstant from '../permissionConstant/PermissionConstant'
 import { toast } from 'vue-sonner';
-
-
+import permissionConstant from '../permissionConstant/PermissionConstant';
+import useUserStore from '../userStore/UserStore';
 
 const userStore = useUserStore();
 
@@ -18,9 +15,7 @@ const password = ref('');
 
 const status = ref('Login')
 
-
 const error = ref(null)
-
 
 function clearError() {
     error.value = null;
@@ -46,7 +41,7 @@ async function handleLogin() {
 
             const response = await axiosInstance.post("/login", payload);
 
-            
+
             toast.success("Login Success")
 
             localStorage.setItem("accessToken", response.data.accessToken);
@@ -55,7 +50,6 @@ async function handleLogin() {
 
             const decodedToken = jwtDecode(response.data.accessToken);
 
-            console.log("Decoded Token"+decodedToken.permissions);
 
             userStore.setUser({
 
@@ -63,7 +57,8 @@ async function handleLogin() {
                 name: decodedToken.name,
                 email: decodedToken.email,
                 department: decodedToken.department,
-                permissions: decodedToken.permissions
+                permissions: decodedToken.permissions,
+                profileImageURL: decodedToken.profileImageURL
             })
 
             userStore.setUserPermission({
@@ -103,8 +98,8 @@ async function handleLogin() {
 
 
         } catch (err) {
-           
- 
+
+
             status.value = "failed!"
 
             if (err.response) {

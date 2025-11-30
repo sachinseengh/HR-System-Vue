@@ -3,7 +3,7 @@ import axios from 'axios';
 import { onMounted, reactive, ref, watch } from 'vue';
 import axiosInstance from '../api/AxiosInstance';
 import { toast } from 'vue-sonner';
- 
+
 
 const userEmit = defineEmits(['user-added'], ['user-updated'], ['user-props-cleared']);
 
@@ -17,6 +17,9 @@ const permissions = ref([]);
 const departments = ref([]);
 
 const permissionSection = ref([]);
+
+const uploadedImage = ref(null);
+const previewImage = ref(null);
 
 
 const props = defineProps({
@@ -39,8 +42,6 @@ watch(() => props.user, (newUserToEdit) => {
 
         selectedPermissionsId.value = newUserToEdit.permission?.map(p => p.id) || []
     }
-
-    console.log("currentPermission------------->"+selectedPermissionsId)
 
 }, { immediate: true });
 
@@ -79,7 +80,6 @@ onMounted(async () => {
             permissionSection.value = [...new Set(permissions.value.map(p => p.section))]
         }
 
-
     } catch (err) {
         if (err.response) {
 
@@ -93,27 +93,41 @@ onMounted(async () => {
 })
 
 async function submitForm() {
-  
+
 
     if (department.value == null) {
         toast.error("select department");
         return
     }
-   
 
-    const payload = {
-        name: name.value,
-        password: password.value,
-        email: email.value,
-        department: department.value,
-        permissions: selectedPermissionsId.value
+
+    const payload = new FormData();
+
+    payload.append("name", name.value);
+    payload.append("password", password.value);
+    payload.append("email", email.value);
+    payload.append("department", department.value);
+ 
+selectedPermissionsId.value.forEach(p => payload.append("permissions", p));
+
+
+    if (uploadedImage.value) {
+        payload.append("image", uploadedImage.value);
     }
-     
+
+    // const payload = {
+    //     name: name.value,
+    //     password: password.value,
+    //     email: email.value,
+    //     department: department.value,
+    //     permissions: selectedPermissionsId.value
+    // }
+
 
     try {
         if (props.user) {
             try {
-                const response = await axiosInstance.put(`/user?user_id=${props.user.id}`, payload); ''
+                const response = await axiosInstance.put(`/user?user_id=${props.user.id}`, payload);
 
                 if (response.status === 200) {
                     toast.success("User Updated Successfully")
@@ -128,9 +142,14 @@ async function submitForm() {
         } else {
             try {
 
-                const response = await axiosInstance.post("/user", payload)
+                const response = await axiosInstance.post("/user", payload,{
 
-                if (response.status === 200) {
+                    headers:{
+                        "Content-Type":"multipart/form-data"
+                    }
+                })
+
+                if (response.status === 201) {
                     toast.success("user added successfully!");
 
                     userEmit('user-added');
@@ -145,14 +164,14 @@ async function submitForm() {
         }
 
     } catch (err) {
-        if(err.response){
+        if (err.response) {
 
-        if (err.response.status === 409) {
-            toast.error("Email already exists")
-        } else if (err.response.status === 500) {
-            toast.error("Server Error")
+            if (err.response.status === 409) {
+                toast.error("Email already exists")
+            } else if (err.response.status === 500) {
+                toast.error("Server Error")
+            }
         }
-    }
     }
 }
 
@@ -164,6 +183,38 @@ function cancelForm() {
     email.value = ''
     selectedPermissionsId.value = []
 }
+
+const handleFileChange = (e) => {
+
+    
+    
+    const file = e.target.files[0];
+  
+
+    if(!file) return;
+        
+    const allowedTypes =["image/jpeg","image/jpg","image/png"];
+    const maxSize = 10*1024*1024;
+
+    if(!allowedTypes.includes(file.type)) {
+
+        toast.error("File type not allowed");
+     e.target.value="";
+        return;
+    }
+
+    if(uploadedImage.size > maxSize){
+        toast.error("Maximum file size is 10MB");
+        file.value = null;
+        e.target.value ="";
+        return;
+    }
+
+    uploadedImage.value = file;
+    previewImage.value = URL.createObjectURL(file);
+
+    }
+ 
 
 </script>
 
@@ -196,21 +247,30 @@ function cancelForm() {
 
                         </Select>
                     </div>
-
+                    
+                        <div class="image-upload" >
+                            <p>Profile image :</p>
+                            <input type="file" accept="image/**" @change="handleFileChange" style="width: 50rem;"
+                                >
+                        </div>
+                        <div v-if="previewImage" class="image-preview">
+                            <img :src="previewImage" :alt="previewImage.value">
+                        </div>
                 </div>
                 <div class="permission">
-                        <p class="permission-title">Permission:</p>
-                        <div class="permission-section" v-for="section in permissionSection" :key="section">
-                            <p class="section-title">{{ section }}</p>
-                            <div class="section-permissions">
-                                <label v-for="permission in permissions" v-show="permission.section === section"
-                                    :key="permission.id" class="permission-checkbox" >
-                                    <input type="checkbox" :value="permission.id" v-model="selectedPermissionsId" :checked="selectedPermissionsId.some(p=>p === permission.id)" />
-                                    {{ String(permission.name).toLowerCase() }}
-                                </label>
-                            </div>
+                    <p class="permission-title">Permission:</p>
+                    <div class="permission-section" v-for="section in permissionSection" :key="section">
+                        <p class="section-title">{{ section }}</p>
+                        <div class="section-permissions">
+                            <label v-for="permission in permissions" v-show="permission.section === section"
+                                :key="permission.id" class="permission-checkbox">
+                                <input type="checkbox" :value="permission.id" v-model="selectedPermissionsId"
+                                    :checked="selectedPermissionsId.some(p => p === permission.id)"  />
+                                {{ String(permission.name).toLowerCase() }}
+                            </label>
                         </div>
                     </div>
+                </div>
 
                 <div class="submitAndCancelBtn">
 
@@ -313,13 +373,14 @@ function cancelForm() {
 .permissions-checkbox {
     display: flex;
     flex-direction: row;
-    
+
 }
+
 .permission {
     margin-top: 2rem;
 }
 
-.permission-title{
+.permission-title {
     font-size: 1.5rem;
     margin-bottom: 2rem;
 }
@@ -348,5 +409,15 @@ function cancelForm() {
     align-items: center;
     /* vertically center checkbox and text */
     gap: 0.3rem;
+}
+
+
+.image-preview img {
+    width: 10rem;
+    height: 10rem;
+    object-fit:contain;
+     border-radius: 50%;
+    border: 2px solid #ccc;
+    margin-top: 0.5rem;
 }
 </style>
